@@ -5,106 +5,144 @@ import google.generativeai as genai
 
 @st.cache_resource
 def init_google_ai():
-    """
-    Inisialisasi Google AI dengan cache
-    """
+    """Inisialisasi Google AI dengan cache"""
     try:
-        # Load environment variables
         load_dotenv()
-        
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
-            st.error("⚠️ Google API Key tidak ditemukan! Silakan tambahkan ke file .env")
+            st.error("⚠️ Google API Key tidak ditemukan! Tambahkan ke file .env")
             st.stop()
-        
-        # Configure Google AI
         genai.configure(api_key=api_key)
-        
-        # Initialize model
         model = genai.GenerativeModel('gemini-2.5-flash')
         return model
     except Exception as e:
-        st.error(f"❌ Error saat menginisialisasi Google AI: {str(e)}")
+        st.error(f"❌ Error saat inisialisasi Google AI: {str(e)}")
         st.stop()
 
-def generate_content(topic, model):
-    """
-    Generate konten menggunakan Google Gemini AI
-    """
+def generate_content(topic, model, style, word_count):
+    """Generate konten menggunakan Google Gemini AI"""
     try:
-        # Prompt template untuk AI
+        if style == "Santai (Gen Z & Milenial)":
+            tone = """
+            - Gunakan bahasa ringan, gaul, dan tetap sopan.
+            - Hindari kata yang terlalu formal atau baku.
+            - Gunakan emoji bila relevan (tidak berlebihan).
+            - Tulis seperti sedang ngobrol santai dengan pembaca online.
+            """
+        else:
+            tone = """
+            - Gunakan bahasa formal dan profesional.
+            - Hindari slang, emoji, atau bahasa gaul.
+            - Gunakan struktur yang rapi dan jelas.
+            - Cocok untuk konteks bisnis, pendidikan, atau profesional.
+            """
+
         prompt = f"""
-        Buatkan konten yang menarik dan informatif tentang topik: "{topic}"
-        
-        Format konten:
-        1. Judul yang catchy
-        2. Pendahuluan singkat
-        3. 3-5 poin utama dengan penjelasan
-        4. Kesimpulan
-        5. Call to action
-        
-        Konten harus:
-        - Mudah dipahami
-        - Informatif dan berguna
-        - Engaging untuk pembaca
-        - Panjang sekitar 200-300 kata
-        
-        Gunakan bahasa Indonesia yang baik dan benar.
+        Kamu adalah AI content writer bernama AIKU yang sangat ahli dalam menulis konten
+        media sosial dan artikel pendek yang menarik, jelas, dan sesuai konteks audiens.
+
+        Tugasmu:
+        Buatkan konten tentang topik: "{topic}"
+
+        Struktur konten:
+        1. Judul (maks 10 kata, relevan dan menarik)
+        2. Pendahuluan singkat (1 paragraf)
+        3. 3–5 poin isi utama dengan penjelasan
+        4. Kesimpulan (1 paragraf)
+        5. Call to action (1 kalimat ajakan)
+
+        Gaya penulisan:
+        {tone}
+
+        Ketentuan tambahan:
+        - Panjang sekitar {word_count} kata.
+        - Harus informatif, engaging, dan mudah dibaca.
+        - Bahasa Indonesia yang baik dan benar.
+
+        Tujuan:
+        Membuat pembaca merasa terhubung dan tertarik untuk membagikan atau menindaklanjuti konten ini.
         """
-        
-        # Generate menggunakan Google AI
+
         response = model.generate_content(prompt)
         return response.text
-    
     except Exception as e:
         return f"❌ Terjadi error saat generate konten: {str(e)}"
 
 def run():
-    """
-    Stage 4: Add AI Integration
-    Menambahkan integrasi penuh dengan Google Gemini AI
-    """
-    
-    # Konfigurasi halaman
-    st.set_page_config(
-        page_title="AI Content Generator",
-        page_icon="🚀"
-    )
-    
-    # Judul aplikasi
-    st.title("AI Content Generator 🚀")
-    
-    # Teks pembuka
-    st.write("Selamat datang di aplikasi AI Content Generator!")
-    st.write("Aplikasi ini menggunakan Google Gemini AI untuk membuat konten berkualitas.")
-    
-    # Inisialisasi Google AI
-    model = init_google_ai()
-    
+    """Menjalankan aplikasi utama"""
+    st.set_page_config(page_title="AIKU", page_icon="🚀")
+
+    # Sidebar info
+    with st.sidebar:
+        st.header("💡 Tentang AIKU")
+        st.markdown("""
+        **AIKU** adalah aplikasi berbasis **Google Gemini AI**  
+        yang membantu kamu membuat konten media sosial dengan cepat dan sesuai gaya yang kamu pilih.
+
+        ### Langkah Penggunaan:
+        1. Masukkan topik konten  
+        2. Pilih gaya bahasa  
+        3. Tentukan panjang kata  
+        4. Klik **🔥 Generate Konten**
+
+        ### Mode Gaya:
+        - 😎 Santai (Gen Z & Milenial)  
+        - 💼 Formal (Profesional)
+
+        """)
+
+    # Main content
+    st.title("🚀 AIKU — Asisten AI Pembuat Konten Cerdas")
+    st.write("Selamat datang di **AIKU**, bantu kamu bikin konten keren, cepat, dan sesuai gaya pilihanmu!")
     st.divider()
-    
-    # Input teks dari user
+
+    model = init_google_ai()
+
+    # Input form
     user_topic = st.text_input(
         "📝 Masukkan topik konten:",
-        placeholder="Contoh: Tips Belajar Python, Manfaat AI dalam Bisnis, dll."
+        placeholder="Contoh: Tips Belajar Python, Manfaat AI dalam Bisnis, atau Lifestyle Sehat."
     )
-    
-    # Tampilkan topik yang dimasukkan user
+
+    style = st.radio(
+        "🎭 Pilih gaya bahasa:",
+        ["Santai (Gen Z & Milenial)", "Formal (Profesional)"],
+        horizontal=True
+    )
+
+    word_count = st.slider(
+        "📏 Tentukan panjang konten (kata):",
+        min_value=100,
+        max_value=500,
+        value=250,
+        step=50
+    )
+
     if user_topic:
-        st.write(f"**Topik yang akan diproses:** {user_topic}")
-    
-    # Tombol untuk generate konten
+        st.write(f"**Topik:** {user_topic}")
+        st.write(f"**Gaya Bahasa:** {style}")
+        st.write(f"**Panjang:** ~{word_count} kata")
+
     if st.button("🔥 Generate Konten", type="primary"):
         if not user_topic.strip():
             st.warning("⚠️ Mohon masukkan topik terlebih dahulu!")
         else:
-            # Generate konten menggunakan AI
-            with st.spinner("🤖 AI sedang bekerja keras membuat konten untuk Anda..."):
-                hasil_konten = generate_content(user_topic, model)
-            
+            with st.spinner("🤖 AIKU sedang menulis konten..."):
+                hasil_konten = generate_content(user_topic, model, style, word_count)
             st.success("✅ Konten berhasil dibuat!")
-            st.subheader("📄 Hasil Konten:")
+            st.subheader("📄 Hasil dari AIKU:")
             st.info(hasil_konten)
+
+    # Footer
+    st.divider()
+    st.markdown("""
+    <div style='text-align: center;'>
+        <p style='font-size:24px;'><strong>Developed with ❤️ + GPT🤣 — AIKU</strong></p>
+        <p style='font-size:18px;'>Supported by Aruta Mentor</p>
+        <p style='font-size:16px;'>Wahyu Maulana & Haris Al-Rasyid</p>
+        <p style='font-size:12px;'>Powered by Google Gemini AI & Streamlit</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     run()
