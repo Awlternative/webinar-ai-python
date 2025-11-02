@@ -90,59 +90,56 @@ def run():
         - 💼 Formal (Profesional)
 
         """)
+        st.divider()
+        st.markdown("""
+        <div style='text-align: center;'>
+            <p style='font-size:14px;'><strong>Developed with ❤️ + GPT🤣</strong></p>
+            <p style='font-size:15px;'>Supported by Aruta Mentor</p>
+            <p style='font-size:11px;'>Wahyu Maulana & Haris Al-Rasyid</p>
+            <p style='font-size:10px;'>Powered by Google Gemini AI & Streamlit</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     # Main content
-    st.title("🚀 AIKU — Asisten AI Pembuat Konten Cerdas")
-    st.write("Selamat datang di **AIKU**, bantu kamu bikin konten keren, cepat, dan sesuai gaya pilihanmu!")
-    st.divider()
+    col1, col2 = st.columns([4, 5])  
+    with col1:
+        st.write("🚀 AIKU")
+        st.write("Selamat datang di **AIKU**, bantu kamu bikin konten keren, cepat, dan sesuai gaya pilihanmu!")
 
+    with col2:
+        style = st.radio(
+            "🎭 Pilih gaya bahasa:",
+            ["Santai (Gen Z & Milenial)", "Formal (Profesional)"],
+            horizontal=True
+        )
+        word_count = st.slider(
+            "📏 Tentukan panjang konten (kata):",
+            min_value=100,
+            max_value=500,
+            value=250,
+            step=50
+        )
+
+    st.divider()
     model = init_google_ai()
 
-    # Input form
-    user_topic = st.text_input(
-        "📝 Masukkan topik konten:",
-        placeholder="Contoh: Tips Belajar Python, Manfaat AI dalam Bisnis, atau Lifestyle Sehat."
-    )
+    # --- Input di bagian bawah (chat style) ---
+    user_topic = st.chat_input("📝 Masukkan topik konten (misal: Tips Belajar Python, Manfaat AI, dll)")
 
-    style = st.radio(
-        "🎭 Pilih gaya bahasa:",
-        ["Santai (Gen Z & Milenial)", "Formal (Profesional)"],
-        horizontal=True
-    )
-
-    word_count = st.slider(
-        "📏 Tentukan panjang konten (kata):",
-        min_value=100,
-        max_value=500,
-        value=250,
-        step=50
-    )
-
+    # --- Logika pemrosesan ---
     if user_topic:
         st.write(f"**Topik:** {user_topic}")
         st.write(f"**Gaya Bahasa:** {style}")
         st.write(f"**Panjang:** ~{word_count} kata")
 
-    if st.button("🔥 Generate Konten", type="primary"):
-        if not user_topic.strip():
-            st.warning("⚠️ Mohon masukkan topik terlebih dahulu!")
-        else:
-            with st.spinner("🤖 AIKU sedang menulis konten..."):
-                hasil_konten = generate_content(user_topic, model, style, word_count)
-            st.success("✅ Konten berhasil dibuat!")
-            st.subheader("📄 Hasil dari AIKU:")
-            st.info(hasil_konten)
+        with st.spinner("🤖 AIKU sedang menulis konten..."):
+            hasil_konten = generate_content(user_topic, model, style, word_count)
 
-    # Footer
-    st.divider()
-    st.markdown("""
-    <div style='text-align: center;'>
-        <p style='font-size:24px;'><strong>Developed with ❤️ + GPT🤣 — AIKU</strong></p>
-        <p style='font-size:18px;'>Supported by Aruta Mentor</p>
-        <p style='font-size:16px;'>Wahyu Maulana & Haris Al-Rasyid</p>
-        <p style='font-size:12px;'>Powered by Google Gemini AI & Streamlit</p>
-    </div>
-    """, unsafe_allow_html=True)
+        st.success("✅ Konten berhasil dibuat!")
+        st.subheader("📄 Hasil dari AIKU:")
+        st.info(hasil_konten)
+
+    
 
 if __name__ == "__main__":
     run()
